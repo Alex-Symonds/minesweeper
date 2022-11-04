@@ -1,0 +1,285 @@
+@use 'variables.scss' as v;
+
+@font-face{
+    font-family: "Play";
+    src: url("../fonts/Play-Regular.ttf");
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+@font-face{
+    font-family: "Play";
+    src: url("../fonts/Play-Bold.ttf");
+    font-size: 16px;
+    font-style: bold;
+    font-weight: 700;
+}
+// @font-face{
+//     font-family: "Exo2";
+//     src: url("../fonts/Exo2-VariableFont_wght");
+//     font-size: 16px;
+// }
+
+
+
+body{
+    --main-font-list: Play, Verdana, sans-serif;
+    color: v.$c_text;
+    font-family: var(--main-font-list);
+    background: v.$c_bg_main;
+    background:linear-gradient(90deg, v.$c_bg_main 0%, v.$c_bg_main_inner 50%, v.$c_bg_main 100%);
+}
+
+h1{
+    display: inline-block;
+    font-size: 2.4rem;
+    margin: 1.5rem 0 1rem;
+    padding: 0.3rem 3rem;
+    border-style: solid;
+    border-color: v.$c_h1_border;
+    border-width: 1px 0;
+    background: v.$g_h1_bg;
+    color: v.$c_h1;
+}
+
+.root{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    width: 100%;
+}
+
+.minesweeper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: min-content;
+}
+
+.panel{
+    width: 100%;
+    margin: 1.5rem 0;
+    padding: 0.6rem 1rem;
+    box-sizing: border-box;
+
+    border: 1px solid v.$c_panel_border;
+    border-radius: 0.3rem;
+    background: v.$c_panel_bg;
+    background: linear-gradient(90deg, v.$c_panel_bg 0%, v.$c_panel_bg_inner 50%, v.$c_panel_bg 100%);
+    box-shadow: 0 0 0.6rem 0.2rem rgba(0, 88, 189, 0.05);
+
+    position: relative;
+    // &:before{
+    //     display: block;
+    //     content: 'SECTION';
+    //     position: absolute;
+    //     top: -0.7rem;
+    //     left: 0.5rem;
+    //     height: 1.4rem;
+
+    //     padding: 0.1rem 0.5rem;
+
+    //     font-weight: bold;
+        
+    //     color: v.$c_text_emphasis;
+    //     background: linear-gradient(transparent calc(50% - 2px), 
+    //                                 v.$c_panel_bg calc(50% - 2px), 
+    //                                 transparent 50%);
+    // }
+    h2{
+        display: block;
+
+        font-size: 1rem;
+        font-weight: normal;
+        margin: 0;
+
+        position: absolute;
+        top: -0.7rem;
+        left: 0.5rem;
+        height: 1.4rem;
+
+        padding: 0.1rem 0.5rem;
+
+        font-weight: bold;
+        
+        color: v.$c_text_emphasis;
+        background: linear-gradient(transparent calc(50% - 2px), 
+                                    v.$c_panel_bg calc(50% - 2px), 
+                                    v.$c_panel_bg calc(50% - 1px), 
+                                    transparent calc(50% - 1px));
+    }
+    &.result h2{
+        background: linear-gradient(transparent calc(50% - 3px), 
+                                    v.$c_panel_bg calc(50% - 3px), 
+                                    v.$c_panel_bg calc(50% - 2px), 
+                                    transparent calc(50% - 2px));
+    }
+}
+
+.progress{
+    
+    p{
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .value{
+        color: v.$c_text_emphasis;
+        border-bottom: 1px solid transparent;
+
+        &.error{
+            font-style: italic;
+            border-bottom: 1px dotted v.$c_lightest;
+        }
+    }
+}
+
+.controls{
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.3rem 0;
+
+    button{
+        font-family: var(--main-font-list);
+        font-size: 1rem;
+        padding: 0.3rem 1rem;
+
+        color: v.$c_panel_border;
+
+        background: transparent;
+        border: 1px solid v.$c_panel_border;
+        border-radius: 0.3rem;
+
+        &:hover{
+            color: v.$c_button_hover_text;
+            border-color: v.$c_text;
+            background: v.$c_button_hover_bg;
+        }
+    }
+}
+
+.result{
+    text-align: center;
+    width: 100%;
+    
+    h3{
+        font-size: 1.6rem;
+        margin: 0.7rem 0 0;
+        padding: 0.3rem 0;
+        color: v.$c_text_emphasis;
+    }
+
+    p{
+        margin: 0.1rem 0 1rem;
+        padding: 0;
+    }
+
+}
+
+.board{
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+
+    margin: 1rem 0.5rem;
+    box-shadow: 0 0 0.4rem 0.05rem rgba(0,0,0, 0.2);
+
+    background: v.$c_bg_main;
+}
+
+.board-row{
+    display: flex;
+}
+
+.tile{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid v.$c_panel_border;
+}
+
+.hidden{
+    background: v.$c_tile_bg_hidden;
+}
+
+.empty{
+    background: transparent;
+}
+
+.mine{
+    background: url(../images/skull-green.svg) v.$c_tile_bg_mine;
+    background-repeat: no-repeat;
+    background-size: 80%;
+    background-position: center;
+}
+.mine.exploded{
+    background-color: v.$c_tile_bg_mine_emphasis;
+    position: relative;
+    &:before{
+        display: block;
+        content: '';
+        position: absolute;
+        width: calc(2rem + 4px);
+        height: calc(2rem + 4px);
+        border: 2px solid v.$c_tile_border_mine_emphasis;
+        box-sizing: border-box;
+    }
+}
+
+.flag{
+    &:before{
+        content: '';
+        background: url(../images/shield-white.svg) transparent;//rgba(v.$c_tile_bg_hidden, 0.6);
+        background-size: 80%;
+        background-repeat: no-repeat;
+        background-position: center;
+        display: block;
+        height: 100%;
+        width: 100%;
+    }
+
+    &.wrong{
+        &:before{
+            background: url(../images/shield-wrong.svg) v.$c_tile_bg_number;
+            background-size: 80%;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+    }
+}
+
+.number{
+    background: v.$c_tile_bg_number;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+.adj1{
+    color: rgb(0, 236, 0);
+}
+.adj2{
+    color: rgb(0, 217, 255);
+}
+.adj3{
+    color: rgb(209, 109, 255);
+}
+.adj4{
+    color: orange;
+}
+.adj5{
+    color: rgb(252, 0, 155);
+}
+.adj6{
+    color: rgb(0, 255, 213);
+}
+.adj7{
+    color: yellow;
+}
+.adj8{
+    color: red;
+}

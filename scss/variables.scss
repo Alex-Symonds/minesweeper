@@ -1,0 +1,78 @@
+
+
+
+
+
+$c_bg_main: rgb(0, 26, 2);
+$c_bg_main_inner: rgb(0, 37, 2);
+
+$c_text: #09FF00;
+$c_text_emphasis: rgb(251, 255, 250);
+
+$c_lightest: rgb(251, 255, 250);
+
+$c_panel_bg: rgb(0, 54, 12);
+$c_panel_bg_inner: rgb(0, 80, 16);
+$c_panel_border: rgb(0, 255, 76);
+
+$c_button_hover_text: $c_bg_main;
+$c_button_hover_bg: $c_text;
+
+$c_tile_bg_hidden: rgb(0, 109, 22);//rgb(0, 94, 19);
+$c_tile_bg_mine: $c_bg_main;//rgb(8, 228, 0);
+$c_tile_bg_mine_emphasis: $c_bg_main_inner;
+$c_tile_border_mine_emphasis: $c_lightest;
+$c_tile_bg_number: rgb(59, 59, 59);
+
+// The h1 is doing "a thing", so give it its own special stuff
+$g_h1_bg: linear-gradient(  90deg,
+                            transparent 0%, 
+                            rgba($c_text,0.45) 13%, 
+                            rgba($c_text,0.9) 45%, 
+                            rgba(rgb(232, 255, 230),1) 50%, 
+                            rgba($c_text,0.9) 55%, 
+                            rgba($c_text,0.45) 87%, 
+                            transparent 100%);
+$c_h1: $c_bg_main;
+$c_h1_border: rgb(8, 245, 0);
+
+
+// h1 with green, but with the green text kinda disappearing into the "explosion" beam
+// $g_h1_bg: linear-gradient(  90deg,
+//                             transparent 0%, 
+//                             rgba($c_text,0.2) 15%, 
+//                             rgba($c_text,0.45) 45%, 
+//                             rgba(rgb(232, 255, 230),1) 50%, 
+//                             rgba($c_text,0.45) 55%, 
+//                             rgba($c_text,0.2) 85%, 
+//                             transparent 100%);
+// $c_h1: rgb(0, 255, 0);
+// $c_h1_border: rgb(8, 245, 0);
+
+
+//$g_h1_bg: linear-gradient(90deg, transparent 0%, rgba(rgb(0, 204, 255),0.5) 40%, rgba(white,0.8) 50%, rgba(rgb(0, 204, 255),0.5) 60%, transparent 100%); // looks kinda cool, but eh...
+
+// This is the set for the light blue layout which you decided you didn't like
+// $c_bg_main: rgb(165, 234, 255);
+// $c_bg_main_inner: rgb(196, 241, 255);
+
+// $c_text: rgb(0, 88, 189);
+
+// $c_lightest: rgb(242, 252, 255);
+
+// $c_panel_bg: rgb(217, 246, 255);
+// $c_panel_bg_inner: rgb(227, 248, 255);
+// $c_panel_border: rgb(114, 206, 235);
+
+
+// $g_h1_bg: linear-gradient(90deg, transparent 0%, rgba($c_lightest,0.5) 7%, rgba($c_lightest,0.9) 50%, rgba($c_lightest,0.5) 93%, transparent 100%);
+// $c_h1: $c_text;
+// $c_h1_border: $c_lightest;
+
+//$c_button_hover_text: $c_text;
+//$c_button_hover_bg: rgba(v.$c_lightest,0.7);
+
+//$c_tile_bg_hidden: rgb(136, 142, 156);
+// $c_tile_bg_mine: rgb(141, 0, 0);
+// $c_tile_bg_mine_emphasis: rgb(138, 0, 0);
+// $c_tile_border_mine_emphasis: red;
