@@ -21,13 +21,19 @@ class Board extends React.Component{
         this.getAdjRowRange = this.getAdjRowRange.bind(this);
         this.getAdjColRange = this.getAdjColumnRange.bind(this);
         this.getNumAdjacent = this.getNumAdjacentMines.bind(this);
-        this.handleClick = this.handleClick.bind(this);
+        this.unhideTile = this.unhideTile.bind(this);
+        this.toggleFlag = this.toggleFlag.bind(this);
+        this.openMenu = this.openMenu.bind(this);
+        this.closeMenu = this.closeMenu.bind(this);
 
         this.state = {
             newboard: this.newBoard.bind(this),
             gameId: null,
             board: this.newBoard(props.numRows, props.numCols, props.numMines),
-            explodedTile: null
+            explodedTile: null,
+            menuIsOpen: false,
+            menuRowId: null,
+            menuColId: null
         };
     }
 
@@ -87,6 +93,25 @@ class Board extends React.Component{
             }))
         }))
     }
+
+    openMenu(rowId, colId){
+        this.setState((state) => { return {
+            ...state,
+            menuIsOpen: true,
+            menuRowId: rowId,
+            menuColId: colId
+        }});
+    }
+
+    closeMenu(){
+        this.setState((state) => { return {
+            ...state,
+            menuIsOpen: false,
+            menuRowId: null,
+            menuColId: null
+        }});
+    }
+
 
 
     getUnhiddenTile(rowNum, colNum){
@@ -259,41 +284,59 @@ class Board extends React.Component{
         }
     }
 
-
-    handleClick(e, rowId, colId){
-        if ("which" in e){
-            var isRightMB = e.which == 3; 
-        }
-        else if ("button" in e){
-            var isRightMB = e.button == 2; 
-        }
-            
-        if(isRightMB){
-            this.toggleFlag(rowId, colId);
-        }
-        else{
-            this.unhideTile(rowId, colId);
-        }
-    }
-
     render(){
         return (
             <section class="panel boardContainer">
                 <h2>ASSIGNED GRID</h2>
+                <KeyboardMode   isMenuMode = {this.props.isMenuMode}
+                                toggleMenuMode = {this.props.toggleMenuMode}
+                                />
+                <TileClickMenu  isMenuMode = {this.props.isMenuMode}
+                                menuIsOpen = {this.state.menuIsOpen}
+                                closeMenu = {this.closeMenu}
+                                board = {this.state.board}
+                                rowId = {this.state.menuRowId}
+                                colId = {this.state.menuColId}
+                                unhideTile = {this.unhideTile}
+                                toggleFlag = {this.toggleFlag} />
                 <div class="board">
                     {this.state.board.map((tileRow, index) => {
                         return <BoardRow    key = {index}
                                             rowNum = {index}
                                             tileRow = {tileRow}
-                                            handleClick = {this.handleClick}
+                                            toggleFlag = {this.toggleFlag}
+                                            unhideTile = {this.unhideTile}
                                             explodedTile = {this.state.explodedTile}
                                             isGameOver = {this.props.isGameOver}
                                             safeTilesRemaining = {this.props.safeTilesRemaining}
+                                            openMenu = {this.openMenu}
+                                            isMenuMode = {this.props.isMenuMode}
                                             />
                     })}
                 </div>
             </section>
         );
+    }
+}
+
+class KeyboardMode extends React.Component{
+    constructor(props){
+        super(props);
+        this.handleClick = this.handleClick.bind(this);
+    }
+
+    handleClick(){
+        if(!this.props.isMenuMode){
+            this.props.toggleMenuMode();
+        }
+
+        document.querySelectorAll('.tile')[0].focus();
+    }
+
+    render(){
+        return(
+            <button class="keyboardStartGame" onClick={this.handleClick}><span>enter game</span></button>
+        ) 
     }
 }
 
@@ -314,6 +357,10 @@ class BoardRow extends React.Component{
                                 isGameOver = {this.props.isGameOver}
                                 isMine = {tile.isMine}
                                 isWon = {this.props.isGameOver && this.props.safeTilesRemaining === 0}
+                                isMenuMode = {this.props.isMenuMode}
+                                openMenu = {this.props.openMenu}
+                                toggleFlag = {this.props.toggleFlag}
+                                unhideTile = {this.props.unhideTile}
                                 />
                     )
                 })}
@@ -329,9 +376,30 @@ class TileUI extends React.Component{
         this.disableContextMenu = this.disableContextMenu.bind(this);
       }
 
+    handleMouseClick(e){
+        if ("which" in e){
+            var isRightMB = e.which == 3; 
+        }
+        else if ("button" in e){
+            var isRightMB = e.button == 2; 
+        }
+            
+        if(isRightMB){
+            this.props.toggleFlag(this.props.rowNum, this.props.colNum);
+        }
+        else{
+            this.props.unhideTile(this.props.rowNum, this.props.colNum);
+        }
+    }
+
     handleClick(e){
         if(!this.props.isGameOver){
-            this.props.handleClick(e, this.props.rowNum, this.props.colNum);
+            if(this.props.isMenuMode){
+                this.props.openMenu(this.props.rowNum, this.props.colNum);
+            }
+            else{
+                this.handleMouseClick(e);
+            } 
         } 
     }
 
@@ -370,7 +438,6 @@ class TileUI extends React.Component{
 
     render(){
         const conditionalCssClasses = this.getConditionalCssClasses();
-
         return (
             <div class={'tile ' + conditionalCssClasses} onClick={this.handleClick} onContextMenu={this.disableContextMenu}>
                 <TileNumberUI   isNumber = {this.props.display === Display.number.name}
@@ -392,6 +459,57 @@ class TileNumberUI extends React.Component{
                 {this.props.number}
             </span>
         );
+    }
+}
+
+class TileClickMenu extends React.Component{
+    constructor(props){
+        super(props);
+        this.toggleFlag = this.toggleFlag.bind(this);
+        this.unhideTile = this.unhideTile.bind(this);
+        this.activeTileIsFlagged = this.activeTileIsFlagged.bind(this);
+    }
+
+    getActiveTile(rowId, colId, board){
+        if(rowId === null || colId === null){
+            return null;
+        }
+        return board[rowId][colId];
+    }
+
+    activeTileIsFlagged(){
+        const activeTile = this.getActiveTile(this.props.rowId, this.props.colId, this.props.board);
+        if(activeTile===null){
+            return null;
+        }
+        return activeTile.displayStatus === Display.flag;
+    }
+
+    toggleFlag(){
+        this.props.toggleFlag(this.props.rowId, this.props.colId);
+        this.props.closeMenu();
+    }
+
+    unhideTile(){
+        this.props.unhideTile(this.props.rowId, this.props.colId);
+        this.props.closeMenu();
+    }
+
+    render(){
+        
+        if(!this.props.isMenuMode || !this.props.menuIsOpen){
+            return null;
+        }
+
+        const isFlagged = this.activeTileIsFlagged();
+        const flaggedDisplayText = isFlagged !== null && isFlagged ? "unflag" : "flag";
+        return(
+            <section class="menu">
+                <button class="close" onClick={this.props.closeMenu}>X</button>
+                <button class="toggleFlag" onClick={this.toggleFlag}>{flaggedDisplayText}</button>
+                <button class="unhideTile" onClick={this.unhideTile}>uncover</button>
+            </section>
+        )
     }
 }
 

@@ -1,15 +1,17 @@
-class MinesweeperPage extends React.Component{
+class MinesweeperGame extends React.Component{
     constructor(props){
         super(props);
         this.updateProgress = this.updateProgress.bind(this);
         this.setGameOver = this.setGameOver.bind(this);
         this.updateFlagCounter = this.updateFlagCounter.bind(this);
         this.reset = this.reset.bind(this);
+        this.toggleMenuMode = this.toggleMenuMode.bind(this);
 
         this.state = {
             gameId: 1,
             gameOver: false,
             flagCounter: 0,
+            isMenuMode: false,
             maxSafeTiles: props.numRows * props.numCols - props.numMines,
             safeTilesRemaining: props.numRows * props.numCols - props.numMines
         }
@@ -44,6 +46,10 @@ class MinesweeperPage extends React.Component{
     updateFlagCounter(change){
         this.setState((state) => { return { ...state, flagCounter: state.flagCounter + change } })
     }
+
+    toggleMenuMode(){
+        this.setState((state) => {return { ...state, isMenuMode: !state.isMenuMode}});
+    }
     
     render(){
         return (
@@ -53,6 +59,8 @@ class MinesweeperPage extends React.Component{
                         flagCount = {this.state.flagCounter}
                         safeTilesRemaining = {this.state.safeTilesRemaining}
                         reset = {this.reset}
+                        isMenuMode = {this.state.isMenuMode}
+                        toggleMenuMode = {this.toggleMenuMode}
                 />
                 <Board  numRows = {this.props.numRows}
                         numCols = {this.props.numCols}
@@ -63,6 +71,8 @@ class MinesweeperPage extends React.Component{
                         setGameOver = {this.setGameOver}
                         isGameOver = {this.state.gameOver}
                         safeTilesRemaining = {this.state.safeTilesRemaining}
+                        isMenuMode = {this.state.isMenuMode}
+                        toggleMenuMode = {this.toggleMenuMode}
                 />
                 <ResultUI   safeTilesRemaining = {this.state.safeTilesRemaining}
                             isGameOver = {this.state.gameOver} 
@@ -81,6 +91,9 @@ class Status extends React.Component{
                             flagCount = {this.props.flagCount}
                             safeTilesRemaining = {this.props.safeTilesRemaining}/>
                 <section class="controls">
+                    <MenuToggle     toggleMenuMode = {this.props.toggleMenuMode}
+                                    isMenuMode = {this.props.isMenuMode}
+                    />
                     <ResetGame reset={this.props.reset}/>
                 </section>
             </section>
@@ -102,10 +115,39 @@ class ProgressUI extends React.Component{
     }
 }
 
+
+class MenuToggle extends React.Component{
+    render(){
+        return (
+            <div class="labelledToggle">
+                <label>input mode</label>
+                <button class="toggle" onClick={this.props.toggleMenuMode}>
+                    <ToggleOption   displayText = 'mouse'
+                                    isActive = {!this.props.isMenuMode}
+                                    />
+                    <ToggleOption   displayText = 'menu'
+                                    isActive = {this.props.isMenuMode}
+                                    />
+                </button>
+            </div>
+        );
+    }
+}
+
+class ToggleOption extends React.Component{
+    render(){
+        const cssActiveOption = 'toggleActive';
+        const cssInactiveOption = 'toggleInactive';
+        return(
+            <span class={this.props.isActive ? cssActiveOption : cssInactiveOption}>{this.props.displayText}</span>
+        )
+    }
+}
+
 class ResetGame extends React.Component{
     render(){
         return(
-            <button onClick={this.props.reset}>
+            <button class="btn" onClick={this.props.reset}>
                 reset
             </button>
         )
@@ -135,4 +177,4 @@ class ResultUI extends React.Component{
 
 
 
-ReactDOM.render(<MinesweeperPage numRows={10} numCols={10} numMines={10} />, document.querySelector(".root"));
+ReactDOM.render(<MinesweeperGame numRows={10} numCols={10} numMines={10} />, document.querySelector(".root"));

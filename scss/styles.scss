@@ -140,27 +140,89 @@ h1{
 
 .controls{
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     padding: 0.3rem 0;
+}
 
-    button{
-        font-family: var(--main-font-list);
-        font-size: 1rem;
-        padding: 0.3rem 1rem;
+button.btn{
+    font-family: var(--main-font-list);
+    font-size: 1rem;
+    padding: 0.3rem 1rem;
 
-        color: v.$c_panel_border;
+    color: v.$c_panel_border;
 
-        background: transparent;
-        border: 1px solid v.$c_panel_border;
-        border-radius: 0.3rem;
+    background: transparent;
+    border: 1px solid v.$c_panel_border;
+    border-radius: 0.3rem;
 
-        &:hover{
+    &:hover{
+        color: v.$c_button_hover_text;
+        border-color: v.$c_text;
+        background: v.$c_button_hover_bg;
+    }
+}
+
+.labelledToggle{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+button.toggle{
+    display: flex;
+    align-items: stretch;
+    padding: 0;
+
+    font-family: var(--main-font-list);
+    font-size: 1rem;
+
+    color: v.$c_panel_border;
+
+    background: transparent;
+    border: 1px solid v.$c_panel_border;
+    border-radius: 0.3rem;
+
+    overflow: hidden;
+    span{
+        padding: 0.2rem 0.5rem;
+    }
+    .toggleActive{
+        color: v.$c_text_emphasis;
+    }
+    .toggleInactive{
+        color: v.$c_text_subtle;
+    }
+    &:hover{
+        .toggleInactive{
             color: v.$c_button_hover_text;
             border-color: v.$c_text;
             background: v.$c_button_hover_bg;
         }
     }
 }
+
+
+.keyboardStartGame{
+    float: right;
+
+    background: url(../images/keyboard.svg) transparent;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 2.55rem;
+    height: 1.2rem;
+    border: none;
+
+    margin: 0 0 1rem 0;
+
+    span{
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: transparent;
+    }
+}
+
+
 
 .result{
     text-align: center;
