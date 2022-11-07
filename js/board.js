@@ -13,7 +13,7 @@ class Display {
     }
 }
 
-class Board extends React.Component{
+class BoardSection extends React.Component{
     constructor(props){
         super(props);
 
@@ -290,7 +290,7 @@ class Board extends React.Component{
                 <h2>ASSIGNED GRID</h2>
                 <KeyboardMode   isMenuMode = {this.props.isMenuMode}
                                 toggleMenuMode = {this.props.toggleMenuMode}
-                                />
+                />
                 <TileClickMenu  isMenuMode = {this.props.isMenuMode}
                                 menuIsOpen = {this.state.menuIsOpen}
                                 closeMenu = {this.closeMenu}
@@ -298,22 +298,17 @@ class Board extends React.Component{
                                 rowId = {this.state.menuRowId}
                                 colId = {this.state.menuColId}
                                 unhideTile = {this.unhideTile}
-                                toggleFlag = {this.toggleFlag} />
-                <div class="board">
-                    {this.state.board.map((tileRow, index) => {
-                        return <BoardRow    key = {index}
-                                            rowNum = {index}
-                                            tileRow = {tileRow}
-                                            toggleFlag = {this.toggleFlag}
-                                            unhideTile = {this.unhideTile}
-                                            explodedTile = {this.state.explodedTile}
-                                            isGameOver = {this.props.isGameOver}
-                                            safeTilesRemaining = {this.props.safeTilesRemaining}
-                                            openMenu = {this.openMenu}
-                                            isMenuMode = {this.props.isMenuMode}
-                                            />
-                    })}
-                </div>
+                                toggleFlag = {this.toggleFlag} 
+                />
+                <Board  board = {this.state.board}
+                        toggleFlag = {this.toggleFlag}
+                        unhideTile = {this.unhideTile}
+                        explodedTile = {this.state.explodedTile}
+                        isGameOver = {this.props.isGameOver}
+                        safeTilesRemaining = {this.props.safeTilesRemaining}
+                        openMenu = {this.openMenu}
+                        isMenuMode = {this.props.isMenuMode}    
+                />
             </section>
         );
     }
@@ -339,6 +334,30 @@ class KeyboardMode extends React.Component{
         ) 
     }
 }
+
+
+class Board extends React.Component{
+    render(){
+        return(
+            <div class="board">
+                {this.props.board.map((tileRow, index) => {
+                return <BoardRow    key = {index}
+                                    rowNum = {index}
+                                    tileRow = {tileRow}
+                                    toggleFlag = {this.props.toggleFlag}
+                                    unhideTile = {this.props.unhideTile}
+                                    explodedTile = {this.props.explodedTile}
+                                    isGameOver = {this.props.isGameOver}
+                                    safeTilesRemaining = {this.props.safeTilesRemaining}
+                                    openMenu = {this.props.openMenu}
+                                    isMenuMode = {this.props.isMenuMode}
+                        />
+                })}
+            </div>
+        )
+    }
+}
+
 
 
 class BoardRow extends React.Component{
