@@ -28,7 +28,11 @@ function css(){
 }
 
 function jsReact() {
-    return gulp.src([`${PATH_WORKING_SCRIPTS}/*.js`])
+    return gulp.src([
+                    `${PATH_WORKING_SCRIPTS}/status.js`,
+                    `${PATH_WORKING_SCRIPTS}/board.js`,
+                    `${PATH_WORKING_SCRIPTS}/main.js`
+                ])
         .pipe(concat('minesweeper-react.js'))
         .pipe(babel({
             presets: ["@babel/preset-react"]
