@@ -122,7 +122,7 @@ class Result extends React.Component{
 
     closeOverlayButton(){
         return (
-            <button autoFocus class="close" onClick={this.handleOverlayClose}>X</button>
+            <button autoFocus class="close" onClick={this.handleOverlayClose}>{String.fromCharCode(8211)}</button>
         )
     }
 
