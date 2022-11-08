@@ -687,8 +687,6 @@ class TileClickMenu extends React.Component{
             let buttons = document.querySelectorAll('.menu')[0].getElementsByTagName('button');
             let maxId = buttons.length - 1;
 
-            console.log(buttons);
-
             // Up arrow
             if(e.keyCode === 38) {  
                 targetId--;
