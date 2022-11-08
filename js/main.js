@@ -26,6 +26,9 @@ class MinesweeperGame extends React.Component{
                 flagCounter: 0,
                 safeTilesRemaining: state.maxSafeTiles 
             }})
+
+        let tile = document.querySelectorAll('.tile')[0];
+        tile.focus();
     }
 
     updateProgress(){
@@ -74,31 +77,111 @@ class MinesweeperGame extends React.Component{
                                 isMenuMode = {this.state.isMenuMode}
                                 toggleMenuMode = {this.toggleMenuMode}
                 />
-                <ResultUI   safeTilesRemaining = {this.state.safeTilesRemaining}
-                            isGameOver = {this.state.gameOver} 
+                <Result     safeTilesRemaining = {this.state.safeTilesRemaining}
+                            isGameOver = {this.state.gameOver}
+                            gameId = {this.state.gameId}
                 />
             </div>
         );
     }
 }
 
-class ResultUI extends React.Component{
+class Result extends React.Component{
+    constructor(props){
+        super(props);
+        this.handleOverlayClose = this.handleOverlayClose.bind(this);
+
+        this.state = {
+            wantOverlay: true,
+            gameId: null
+        };
+    }
+
+    static getDerivedStateFromProps(props, state){
+        if(state.gameId === null || state.gameId !== props.gameId){
+            return {
+                ...state,
+                wantOverlay: true,
+                gameId: props.gameId
+            }
+        }
+    }
+
+    removeOverlay(){
+        this.setState((state) => { return {
+            ...state,
+            wantOverlay: false
+        }});
+    }
+
+    handleOverlayClose(){
+        // Move focus to reset button so keyboard users can play again easily
+        document.getElementById('reset_btn_id').focus();
+        this.removeOverlay();
+    }
+
+    closeOverlayButton(){
+        return (
+            <button autoFocus class="close" onClick={this.handleOverlayClose}>X</button>
+        )
+    }
+
+    getOverlayPositionStyle(){
+        if(!this.state.wantOverlay){
+            return null;
+        }
+
+        // Position the overlay across the board. Vertically centered would be 
+        // nice, but then we'd need to take the height of the message into
+        // account when it won't've been rendered yet and BLEH.
+        // = Go with 25% from the top of the board and hope nobody writes a novel 
+        // for the victory/loss messages.
+
+        let boardEle = document.getElementById('board_id');
+        let bounding = boardEle.getBoundingClientRect();
+        let pos = bounding.top + Math.round((bounding.bottom - bounding.top) / 4);
+
+        return {
+            top: pos + "px"
+        };
+    }
+
     render(){
         if(!this.props.isGameOver) return null;
-
         const won = this.props.safeTilesRemaining === 0;
-        const resultClass = won ? "win" : "loss";
-        const status = won ? "success" : "failure";
-        const message = won ? "lives saved: incalculable. congratulations++" : "explosions chaining. all hope lost. goodb-"
-        
+
+        if(this.state.wantOverlay){
+            return (
+                <div class="overlayWrapper" style={this.getOverlayPositionStyle()}>
+                    <ResultPanel    closeOverlayButton = {this.closeOverlayButton()}
+                                    won = {won}
+                    />
+                </div>
+            )
+        }
+        return <ResultPanel     closeOverlayButton = {null}
+                                won = {won}
+                />
+    }
+}
+
+class ResultPanel extends React.Component{
+    render(){
+        const status = this.props.won ? "success" : "failure";
+        const message = this.props.won ? 
+                "lives saved: incalculable. congratulations++" : 
+                "explosions chaining. all hope lost. goodb-";
+
         return(
-            <section class={'panel result ' + resultClass}>
+            <section class="panel result">
                 <h2>MISSION RESULT</h2>
+                {this.props.closeOverlayButton}
                 <h3>{status.toUpperCase()}</h3>
                 <p>{message}</p>
             </section>
         );
     }
 }
+
 
 ReactDOM.render(<MinesweeperGame numRows={10} numCols={10} numMines={10} />, document.querySelector(".root"));

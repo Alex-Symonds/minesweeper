@@ -62,7 +62,7 @@ class ToggleOption extends React.Component{
 class ResetGame extends React.Component{
     render(){
         return(
-            <button class="btn" onClick={this.props.reset}>
+            <button class="btn" id="reset_btn_id" onClick={this.props.reset}>
                 reset
             </button>
         )
