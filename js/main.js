@@ -58,28 +58,28 @@ class MinesweeperGame extends React.Component{
         return (
             <div class="minesweeper">
                 <h1>MINESWEEPER</h1>
-                <Status totalMines = {this.props.numMines}
-                        flagCount = {this.state.flagCounter}
-                        safeTilesRemaining = {this.state.safeTilesRemaining}
-                        reset = {this.reset}
-                        isMenuMode = {this.state.isMenuMode}
-                        toggleMenuMode = {this.toggleMenuMode}
+                <StatusUI   flagCount = {this.state.flagCounter}
+                            isMenuMode = {this.state.isMenuMode}
+                            reset = {this.reset}
+                            safeTilesRemaining = {this.state.safeTilesRemaining}
+                            toggleMenuMode = {this.toggleMenuMode}
+                            totalMines = {this.props.numMines}       
                 />
-                <BoardSection numRows = {this.props.numRows}
+                <BoardSection   gameId = {this.state.gameId}
+                                isMenuMode = {this.state.isMenuMode}
+                                isGameOver = {this.state.gameOver}
                                 numCols = {this.props.numCols}
                                 numMines = {this.props.numMines}
-                                gameId = {this.state.gameId}
-                                updateProgress = {this.updateProgress}
-                                updateFlagCounter = {this.updateFlagCounter}
-                                setGameOver = {this.setGameOver}
-                                isGameOver = {this.state.gameOver}
+                                numRows = {this.props.numRows}
                                 safeTilesRemaining = {this.state.safeTilesRemaining}
-                                isMenuMode = {this.state.isMenuMode}
+                                setGameOver = {this.setGameOver}
                                 toggleMenuMode = {this.toggleMenuMode}
+                                updateFlagCounter = {this.updateFlagCounter}
+                                updateProgress = {this.updateProgress}              
                 />
-                <Result     safeTilesRemaining = {this.state.safeTilesRemaining}
+                <Result     gameId = {this.state.gameId}   
                             isGameOver = {this.state.gameOver}
-                            gameId = {this.state.gameId}
+                            safeTilesRemaining = {this.state.safeTilesRemaining}        
                 />
             </div>
         );
@@ -92,8 +92,8 @@ class Result extends React.Component{
         this.handleOverlayClose = this.handleOverlayClose.bind(this);
 
         this.state = {
-            wantOverlay: true,
-            gameId: null
+            gameId: null,
+            wantOverlay: true
         };
     }
 
@@ -152,20 +152,20 @@ class Result extends React.Component{
 
         if(this.state.wantOverlay){
             return (
-                <div class="overlayWrapper" style={this.getOverlayPositionStyle()}>
-                    <ResultPanel    closeOverlayButton = {this.closeOverlayButton()}
+                <div class="overlayWrapper message" style={this.getOverlayPositionStyle()}>
+                    <ResultPanelUI  closeOverlayButton = {this.closeOverlayButton()}
                                     won = {won}
                     />
                 </div>
             )
         }
-        return <ResultPanel     closeOverlayButton = {null}
+        return <ResultPanelUI   closeOverlayButton = {null}
                                 won = {won}
                 />
     }
 }
 
-class ResultPanel extends React.Component{
+class ResultPanelUI extends React.Component{
     render(){
         const status = this.props.won ? "success" : "failure";
         const message = this.props.won ? 
@@ -182,6 +182,5 @@ class ResultPanel extends React.Component{
         );
     }
 }
-
 
 ReactDOM.render(<MinesweeperGame numRows={10} numCols={10} numMines={10} />, document.querySelector(".root"));

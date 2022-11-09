@@ -1,16 +1,18 @@
-class Status extends React.Component{
+class StatusUI extends React.Component{
     render(){
         return(
             <section class="panel statusControls">
                 <h2>MISSION STATUS</h2>
-                <ProgressUI totalMines = {this.props.totalMines}
-                            flagCount = {this.props.flagCount}
-                            safeTilesRemaining = {this.props.safeTilesRemaining}/>
+                <ProgressUI flagCount = {this.props.flagCount}
+                            safeTilesRemaining = {this.props.safeTilesRemaining}
+                            totalMines = {this.props.totalMines}
+                />
                 <section class="controls">
-                    <MenuToggle     toggleMenuMode = {this.props.toggleMenuMode}
-                                    isMenuMode = {this.props.isMenuMode}
+                    <MenuToggleUI   isMenuMode = {this.props.isMenuMode}
+                                    toggleMenuMode = {this.props.toggleMenuMode}     
                     />
-                    <ResetGame reset={this.props.reset}/>
+                    <ResetGameUI reset={this.props.reset}
+                    />
                 </section>
             </section>
         )
@@ -31,16 +33,16 @@ class ProgressUI extends React.Component{
     }
 }
 
-class MenuToggle extends React.Component{
+class MenuToggleUI extends React.Component{
     render(){
         return (
             <div class="labelledToggle">
                 <label>input mode</label>
                 <button class="toggle" onClick={this.props.toggleMenuMode}>
-                    <ToggleOption   displayText = 'mouse'
+                    <ToggleOptionUI displayText = 'mouse'
                                     isActive = {!this.props.isMenuMode}
                                     />
-                    <ToggleOption   displayText = 'menu'
+                    <ToggleOptionUI displayText = 'menu'
                                     isActive = {this.props.isMenuMode}
                                     />
                 </button>
@@ -49,7 +51,7 @@ class MenuToggle extends React.Component{
     }
 }
 
-class ToggleOption extends React.Component{
+class ToggleOptionUI extends React.Component{
     render(){
         const cssActiveOption = 'toggleActive';
         const cssInactiveOption = 'toggleInactive';
@@ -59,7 +61,7 @@ class ToggleOption extends React.Component{
     }
 }
 
-class ResetGame extends React.Component{
+class ResetGameUI extends React.Component{
     render(){
         return(
             <button class="btn" id="reset_btn_id" onClick={this.props.reset}>
