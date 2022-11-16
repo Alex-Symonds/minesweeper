@@ -3,6 +3,7 @@ class Controls extends React.Component{
         return (
             <section className="panel controls">
                 <h2>CONTROLS</h2>
+
                 <div className="controls-row">
                     <div className="controls-row__title">
                         <span>colour theme</span>
@@ -11,6 +12,7 @@ class Controls extends React.Component{
                                         theme = {this.props.theme}
                     />
                 </div>
+
                 <div className="controls-row" role="radiogroup" aria-labelledby="inputMode_label_id">
                     <div className="controls-row__title" id="inputMode_label_id">
                         <span>input mode</span>
@@ -19,6 +21,7 @@ class Controls extends React.Component{
                                     setInputMode = {this.props.setInputMode}     
                     />
                 </div>
+
                 <div className="controls-row">
                     <div className="controls-row__title">
                         <span>board status</span>
@@ -29,6 +32,7 @@ class Controls extends React.Component{
                     <ResetGameButtonUI reset={this.props.reset}
                     />
                 </div>
+
             </section>
         )
     }
@@ -98,9 +102,9 @@ class ThemeToggleButton extends React.Component{
     }
 
     render(){
-        const modeNow = this.props.theme === DARK ? "dark" : "light";
-        const toMode = this.props.theme === DARK ? "light" : "dark";
-        const screenReaderDesc = `${modeNow} mode is active: click to switch to ${toMode} mode`;
+        const thisMode = this.props.theme === DARK ? "dark" : "light";
+        const otherMode = this.props.theme === DARK ? "light" : "dark";
+        const screenReaderDesc = `${thisMode} mode is active: click to switch to ${otherMode} mode`;
 
         return (
             <button className="theme-toggle" onClick={this.toggleTheme}>
@@ -108,9 +112,10 @@ class ThemeToggleButton extends React.Component{
                 <div className="divider"><span>{screenReaderDesc}</span></div>
                 <div className="option last"></div>
             </button>
-            );
+        );
     }
 }
+
 
 class EnterBoardButton extends React.Component{
     focusInsideBoard(){

@@ -23,13 +23,14 @@ class BoardSection extends React.Component{
         this.getAdjRowRange = this.getAdjRowRange.bind(this);
         this.getNumAdjacent = this.getNumAdjacentMines.bind(this);
         this.getTileEle = this.getTileEle.bind(this);
+        this.getTileObj = this.getTileObj.bind(this);
         this.toggleFlag = this.toggleFlag.bind(this);
         this.unhideTile = this.unhideTile.bind(this);
         this.updateBoard = this.updateBoard.bind(this);
 
         this.state = {
             newboard: this.newBoard.bind(this),
-            board: this.newBoard(props.numRows, props.numCols, props.numMines),
+            board: this.newBoard(),
             explodedTile: null,
             gameId: null,
             isActive: true,
@@ -45,7 +46,7 @@ class BoardSection extends React.Component{
         if(state.gameId === null || state.gameId !== props.gameId){
             return {
                 ...state,
-                board: state.newboard(props.numRows, props.numCols, props.numMines),
+                board: state.newboard(),
                 explodedTile: null,
                 gameId: props.gameId,
                 isActive: true,
@@ -55,10 +56,13 @@ class BoardSection extends React.Component{
             }
         }
 
-        // Handle user switching from touch/keyboard to mouse mode partway through a game
-        if(!props.isMenuMode && state.menuTileId?.row !== null){
+        // Handle user switching between menu and no-menu during a single game
+        // i.e. don't want any menu behaviour to persist when it's been switched off;
+        // don't want details "remembered" from earlier if it's switched back on again
+        if(!props.isMenuMode && state.menuTileId !== null){
             return{
                 ...state,
+                menuIsOpen: false,
                 menuPos: null,
                 menuTileId: null
             }
@@ -67,6 +71,8 @@ class BoardSection extends React.Component{
         return null;
     }
 
+
+    // Watch out for "game won" signals, so as to activate the board's response
     componentDidMount(){
         if(this.state.isActive && this.props.isGameOver && this.props.safeTilesRemaining === 0){
             this.gameOverWon();
@@ -80,17 +86,14 @@ class BoardSection extends React.Component{
     }
 
 
-
-
-    
-    newBoard(numRows, numCols, numMines){
+    newBoard(){
         var board = [];
-        const mineLocations = this.sample(numRows * numCols, numMines);
+        const mineLocations = this.sample(this.props.numRows * this.props.numCols, this.props.numMines);
 
-        for(var r = 0; r < numRows; r++){
+        for(var r = 0; r < this.props.numRows; r++){
             var row = [];
-            for(var c = 0; c < numCols; c++){
-                var tileIsMine = mineLocations.includes(r * numCols + c);
+            for(var c = 0; c < this.props.numCols; c++){
+                var tileIsMine = mineLocations.includes(r * this.props.numCols + c);
                 row.push({
                     isMine: tileIsMine,
                     displayStatus: Display.hidden,
@@ -102,7 +105,6 @@ class BoardSection extends React.Component{
 
         return board;
     }
-
 
     sample(maxNumber, numSamples){
         var samples = [];
@@ -120,8 +122,8 @@ class BoardSection extends React.Component{
     updateBoard(rowNum, colNum, updatedTile){
         this.setState(state => ({
             ...state,
-            board: state.board.map((row, r) => row.map((item, c) => {
-                if(r !== rowNum || c !== colNum) return item;
+            board: state.board.map((row, r) => row.map((tile, c) => {
+                if(r !== rowNum || c !== colNum) return tile;
                 return updatedTile;
             }))
         }))
@@ -155,9 +157,9 @@ class BoardSection extends React.Component{
 
 
     getUnhiddenTile(rowNum, colNum){
-        var oldTile = this.state.board[rowNum][colNum];
-        
-        if(oldTile.displayStatus !== Display.hidden){
+        var oldTile = this.getTileObj(rowNum, colNum);
+
+        if(oldTile?.displayStatus !== Display.hidden){
             return oldTile;
         }
 
@@ -248,11 +250,11 @@ class BoardSection extends React.Component{
         }
         
         // Unhide the specified tile and update memo and board accordingly
-        memo[key] = 0;
+        memo[key] = true;
         const tile = this.getUnhiddenTile(rowId, colId);
         this.updateBoard(rowId, colId, tile);
         
-        // Unhiding a mine means "game over", so do the game over stuff
+        // Unhiding a mine means "game over"
         if(tile.isMine){
             this.gameOverLost(rowId, colId);
             return;
@@ -278,8 +280,6 @@ class BoardSection extends React.Component{
                 }
             }
         }
-
-        return;
     }
 
 
@@ -302,17 +302,51 @@ class BoardSection extends React.Component{
         }
     }
 
+
     gameOverWon(){
-        this.autoFlagMines();
+        this.finishBoard(true);
+    }
+
+
+    gameOverLost(rowId, colId){
+        this.setState((prevState) => {
+            return{
+                ...prevState,
+                explodedTile: {
+                    row: rowId, 
+                    column: colId
+                }
+            }
+        })
+
+        this.finishBoard(false);
+        this.props.setGameOver();
+    }
+
+
+    finishBoard(playerHasWon){
         this.setState((prevState) => {
             return{
                 ...prevState,
                 isActive: false
             }
         });
+
+        // Make the board look finished by auto-updating any remaining hidden tiles
+        if(playerHasWon){
+            // By definition, winning means that any/all remaining hidden tiles must be mines.
+            // Flag the hidden mine-tiles, making the board look complete while also exuding
+            // an air of success.
+            this.flagHiddenMines();
+        }
+        else{
+            // Unhide everything: exude an air of "complete, but also KABOOMED".
+            this.unhideAllTiles();
+        }
     }
 
-    autoFlagMines(){
+
+    flagHiddenMines(){
         for(var r = 0; r < this.state.board.length; r++){
             for(var c = 0; c < this.state.board[0].length; c++){
                 const tile = this.state.board[r][c];
@@ -323,21 +357,8 @@ class BoardSection extends React.Component{
         }
     }
 
-    gameOverLost(rowId, colId){
-        this.setState((prevState) => {
-            return{
-                ...prevState,
-                explodedTile: [rowId, colId],
-                isActive: false
-            }
-        })
 
-        this.unhideAll();
-        this.props.setGameOver();
-    }
-
-
-    unhideAll(){
+    unhideAllTiles(){
         for(var r = 0; r < this.state.board.length; r++){
             for(var c = 0; c < this.state.board[0].length; c++){
                 const oldTile = this.state.board[r][c];
@@ -349,14 +370,19 @@ class BoardSection extends React.Component{
         }
     }
 
+
     getTileEle(rowId, colId){
         let tileEles = document.querySelectorAll('.tile');
         let index = (rowId * this.state.board[0].length) + colId;
         return tileEles[index];
     }
 
-
-
+    getTileObj(rowId, colId){
+        if(rowId === null || colId === null){
+            return null;
+        }
+        return this.state.board[rowId][colId];
+    }
 
 
     render(){
@@ -369,31 +395,28 @@ class BoardSection extends React.Component{
                 />
                 { this.props.isMenuMode && this.state.menuIsOpen &&
 
-                    <TileClickMenu  board = {this.state.board}
-                        closeMenu = {this.closeMenu}
-                        getTileEle = {this.getTileEle}
-                        isKeyboardMode = {this.props.isKeyboardMode}
-                        isMenuMode = {this.props.isMenuMode}
-                        menuIsOpen = {this.state.menuIsOpen}
-                        menuPos = {this.state.menuPos}
-                        menuTileId = {this.state.menuTileId}
-                        toggleFlag = {this.toggleFlag}
-                        unhideTile = {this.unhideTile}            
+                    <TileClickMenu  closeMenu = {this.closeMenu}
+                                    getTileEle = {this.getTileEle}
+                                    getTileObj = {this.getTileObj}
+                                    isMenuMode = {this.props.isMenuMode}
+                                    menuPos = {this.state.menuPos}
+                                    menuTileId = {this.state.menuTileId}
+                                    toggleFlag = {this.toggleFlag}
+                                    unhideTile = {this.unhideTile}            
                     />
 
                 }
-                <Board  board = {this.state.board}
-                        closeMenu = {this.closeMenu}
-                        explodedTile = {this.state.explodedTile}
-                        getTileEle = {this.getTileEle}
-                        isGameOver = {this.props.isGameOver}
-                        isMenuMode = {this.props.isMenuMode}
-                        menuTileId = {this.state.menuTileId}
-                        openMenu = {this.openMenu}
-                        saveClickCoords = {this.saveClickCoords}
-                        safeTilesRemaining = {this.props.safeTilesRemaining}
-                        toggleFlag = {this.toggleFlag}
-                        unhideTile = {this.unhideTile}           
+                <BoardUI    board = {this.state.board}
+                            closeMenu = {this.closeMenu}
+                            explodedTile = {this.state.explodedTile}
+                            getTileEle = {this.getTileEle}
+                            isGameOver = {this.props.isGameOver}
+                            isMenuMode = {this.props.isMenuMode}
+                            menuTileId = {this.state.menuTileId}
+                            openMenu = {this.openMenu}
+                            safeTilesRemaining = {this.props.safeTilesRemaining}
+                            toggleFlag = {this.toggleFlag}
+                            unhideTile = {this.unhideTile}           
                 />
             </section>
         );
@@ -416,12 +439,119 @@ class ProgressUI extends React.Component{
 }
 
 
-class Board extends React.Component{
+class TileClickMenu extends React.Component{
+    constructor(props){
+        super(props);
+        this.activeTileIsFlagged = this.activeTileIsFlagged.bind(this);
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.toggleFlag = this.toggleFlag.bind(this);
+        this.unhideTile = this.unhideTile.bind(this);
+        
+        this.state = {
+            selectedId: 0
+        }
+    }
+
+
+    setSelected(selectedId){
+        this.setState((state) => { return {
+            ...state,
+            selectedId: selectedId
+        }});
+    }
+
+
+    closeMenu(){
+        let activeTileEle = this.props.getTileEle(this.props.menuTileId?.row, this.props.menuTileId?.column);
+        activeTileEle.focus();
+        this.props.closeMenu();
+    }
+
+
+    unhideTile(){
+        this.props.unhideTile(this.props.menuTileId?.row, this.props.menuTileId?.column);
+        this.closeMenu();
+    }
+
+
+    toggleFlag(){
+        this.props.toggleFlag(this.props.menuTileId?.row, this.props.menuTileId?.column);
+        this.closeMenu();
+    }
+
+
+    activeTileIsFlagged(){
+        const activeTile = this.props.getTileObj(this.props.menuTileId?.row, this.props.menuTileId?.column);
+        if(activeTile === null){
+            return null;
+        }
+        return activeTile.displayStatus === Display.flag;
+    }
+
+
+    handleKeyDown(e){
+        // Tab and escape
+        if(e.keyCode === 9 || e.keyCode === 27) {
+            e.preventDefault();
+            this.closeMenu();
+        }
+        // Up/down arrows
+        else if(e.keyCode === 38 || e.keyCode === 40){
+            e.preventDefault(); // Prevent the website from scrolling distractingly in the background
+
+            let targetId = this.state.selectedId;
+            let buttons = document.querySelectorAll('.menu')[0].getElementsByTagName('button');
+            let maxId = buttons.length - 1;
+
+            // Up arrow
+            if(e.keyCode === 38) {  
+                targetId--;
+                if(targetId < 0){
+                    targetId = maxId;
+                }
+            }
+            // Down arrow
+            else if(e.keyCode === 40) {
+                targetId++;
+                if(targetId > maxId){
+                    targetId = 0;
+                }
+            }
+            this.setSelected(targetId);
+            buttons[targetId].focus();
+        }
+    }
+
+    
+    getPositioningStyle(){
+        return {
+            top: this.props.menuPos.y + 'px',
+            left: this.props.menuPos.x + 'px'
+        };
+    }
+
+
+    render(){
+        const isFlagged = this.activeTileIsFlagged();
+        const flaggedMode = isFlagged !== null && isFlagged ? "unflag" : "addflag";
+        return(
+            <div className="overlayWrapper menu" style={this.getPositioningStyle()}>
+                <section className="tileMenu" onKeyDown={this.handleKeyDown}>
+                    <button autoFocus className="tileMenuBtn unhideTile" onClick={this.unhideTile}></button>
+                    <button className={"tileMenuBtn " + flaggedMode} onClick={this.toggleFlag}></button>
+                </section>
+            </div>
+        )
+    }
+}
+
+
+class BoardUI extends React.Component{
     render(){
         return(
             <div id="board_id" className="board">
                 {this.props.board.map((tileRow, index) => {
-                return <BoardRow    key = {index}
+                return <BoardRowUI  key = {index}
                                     closeMenu = {this.props.closeMenu}
                                     explodedTile = {this.props.explodedTile}
                                     getTileEle = {this.props.getTileEle}
@@ -445,7 +575,7 @@ class Board extends React.Component{
 
 
 
-class BoardRow extends React.Component{
+class BoardRowUI extends React.Component{
     render(){
         return (
             <div className="board-row">
@@ -457,8 +587,7 @@ class BoardRow extends React.Component{
                                 closeMenu = {this.props.closeMenu}
                                 display = {tile.displayStatus.name}
                                 getTileEle = {this.props.getTileEle}
-                                handleClick = {this.props.handleClick}
-                                isExplodedTile = {this.props.explodedTile !== null && this.props.explodedTile[0] === this.props.rowId && this.props.explodedTile[1] === index}
+                                isExplodedTile = {this.props.explodedTile?.row === this.props.rowId && this.props.explodedTile?.column === index}
                                 isGameOver = {this.props.isGameOver}
                                 isMenuMode = {this.props.isMenuMode}
                                 isMine = {tile.isMine}
@@ -469,7 +598,7 @@ class BoardRow extends React.Component{
                                 openMenu = {this.props.openMenu}
                                 rowId = {this.props.rowId}
                                 toggleFlag = {this.props.toggleFlag}
-                                unhideTile = {this.props.unhideTile}      
+                                unhideTile = {this.props.unhideTile}  
                         />
                     )
                 })}
@@ -487,28 +616,6 @@ class Tile extends React.Component{
         this.hasActiveMenu = this.hasActiveMenu.bind(this);
     }
 
-    handleMouseClick(e){
-        if ("which" in e){
-            var isRightMB = e.which == 3; 
-        }
-        else if ("button" in e){
-            var isRightMB = e.button == 2; 
-        }
-            
-        if(isRightMB){
-            this.props.toggleFlag(this.props.rowId, this.props.colId);
-        }
-        else{
-            this.props.unhideTile(this.props.rowId, this.props.colId);
-        }
-    }
-
-    disableContextMenu(e){
-        if(!this.props.isGameOver){
-            e.preventDefault();
-            this.handleClick(e);
-        }
-    }
 
     handleClick(e){
         if(!this.props.isGameOver){
@@ -531,6 +638,37 @@ class Tile extends React.Component{
         } 
     }
 
+
+    handleMouseClick(e){
+        if ("which" in e){
+            var isRightMB = e.which == 3; 
+        }
+        else if ("button" in e){
+            var isRightMB = e.button == 2; 
+        }
+            
+        if(isRightMB){
+            this.props.toggleFlag(this.props.rowId, this.props.colId);
+        }
+        else{
+            this.props.unhideTile(this.props.rowId, this.props.colId);
+        }
+    }
+
+
+    disableContextMenu(e){
+        if(!this.props.isGameOver){
+            e.preventDefault();
+            this.handleClick(e);
+        }
+    }
+
+
+    hasActiveMenu(){
+        return this.props.menuTileId?.row === this.props.rowId && this.props.menuTileId?.column === this.props.colId;
+    }
+
+
     getMenuCoords(e){
         let relativeEle = document.querySelector('.boardContainer');
         let relativeBounding = relativeEle.getBoundingClientRect();
@@ -541,17 +679,17 @@ class Tile extends React.Component{
         let tileEle = this.props.getTileEle(this.props.rowId, this.props.colId);
         let tileBounding = tileEle.getBoundingClientRect();
         
+        // Keyboard = treat as if the player clicked the bottom centre of the tile
         if(e.clientX === undefined || e.clientX === undefined){
-            // Keyboard = pretend the user clicked the bottom centre of the tile
             let tileHalfWidth = Math.round((tileBounding.right - tileBounding.left) / 2);
             relX = tileBounding.left - relativeBounding.left + tileHalfWidth;
             relY = tileBounding.bottom - relativeBounding.top;
         }
+        // Touchscreen = touchscreen players close the menu by tapping the tile again.
         else{
-            // Touchscreen = touchscreen users close the menu by tapping the tile again.
-            // If the menu appeared directly on top of the tap location, it would be possible
-            // for the menu to completely block off the tile, leaving no way to close the menu.
-            // Solution: offset the menu position vertically to always leave "tapping space" above.
+            // Note: If the menu appeared directly on top of the tap location, it would be possible
+            // for the menu to completely block off the tapped tile, leaving no way to close the menu.
+            // Solution: offset the menu position vertically to leave some "tapping space" above.
             let spaceForClosingTap = (tileBounding.bottom - tileBounding.top) / 2.5;
             relX = e.clientX - relativeBounding.left;
             relY = e.clientY - relativeBounding.top + spaceForClosingTap;
@@ -562,6 +700,7 @@ class Tile extends React.Component{
             y: relY
         }
     }
+
 
     getXPosWithMenuCentred(pointToCentreAround){
         const TILE_TO_MENU_WIDTH_MULTIPLIER = 1.75; // buttons are 1.25x width; padding is .5x (.25x each for left and right)
@@ -640,19 +779,17 @@ class Tile extends React.Component{
         return this.props.isExplodedTile ? ' exploded' : '';
     }
 
-    // Show which tile is focussed (primarily for keyboard users)
+    // Show which tile is targetted by the menu (primarily for keyboard users)
     getCssClassMenuActive(){
         return this.props.isMenuMode && this.hasActiveMenu() ? ' menuActive' : '';
     }
 
+    // Apply a class to change the colour of a numbered tile based on the number inside
     getCssNumberSpecific(){
         return this.props.display === Display.number.name ? ` adj${this.props.adjMines}` : '';
     }
 
-    hasActiveMenu(){
-        return this.props.menuTileId?.row === this.props.rowId && this.props.menuTileId?.column === this.props.colId;
-    }
-
+    // Many conditional CSS classes; handle it!
     getConditionalCssClasses(){
         const cssClasses = [
             this.props.display,
@@ -664,139 +801,18 @@ class Tile extends React.Component{
         return cssClasses.join('');
     }
 
+
     render(){
         const conditionalCssClasses = this.getConditionalCssClasses();
         const TAB_INDEX = -1;
         return (
             <div className={'tile ' + conditionalCssClasses} tabIndex={TAB_INDEX} onClick={this.handleClick} onContextMenu={this.disableContextMenu} onKeyDown={this.handleKeydown}>
                 { this.props.display === Display.number.name &&
-                    <TileNumberUI   number = {this.props.adjMines}/>
+                    <span>
+                        {this.props.adjMines}
+                    </span>
                 }
             </div>
         );
     }
 }
-
-class TileNumberUI extends React.Component{
-    render(){
-        return (
-            <span>
-                {this.props.number}
-            </span>
-        );
-    }
-}
-
-class TileClickMenu extends React.Component{
-    constructor(props){
-        super(props);
-        this.activeTileIsFlagged = this.activeTileIsFlagged.bind(this);
-        this.handleKeyDown = this.handleKeyDown.bind(this);
-        this.toggleFlag = this.toggleFlag.bind(this);
-        this.unhideTile = this.unhideTile.bind(this);
-        
-        this.state = {
-            selectedId: 0
-        }
-    }
-
-
-    setSelected(selectedId){
-        this.setState((state) => { return {
-            ...state,
-            selectedId: selectedId
-        }});
-    }
-
-
-    toggleFlag(){
-        this.props.toggleFlag(this.props.menuTileId.row, this.props.menuTileId.column);
-        this.closeMenu();
-    }
-
-
-    unhideTile(){
-        this.props.unhideTile(this.props.menuTileId.row, this.props.menuTileId.column);
-        this.closeMenu();
-    }
-
-
-    closeMenu(){
-        let activeTileEle = this.props.getTileEle(this.props.menuTileId.row, this.props.menuTileId.column);
-        activeTileEle.focus();
-        this.props.closeMenu();
-    }
-
-
-    getActiveTile(rowId, colId, board){
-        if(rowId === null || colId === null){
-            return null;
-        }
-        return board[rowId][colId];
-    }
-
-
-    activeTileIsFlagged(){
-        const activeTile = this.getActiveTile(this.props.menuTileId.row, this.props.menuTileId.column, this.props.board);
-        if(activeTile===null){
-            return null;
-        }
-        return activeTile.displayStatus === Display.flag;
-    }
-
-
-    getPositioningStyle(){
-        return {
-            top: this.props.menuPos.y + 'px',
-            left: this.props.menuPos.x + 'px'
-        };
-    }
-
-    
-    handleKeyDown(e){
-        // Tab and escape
-        if(e.keyCode === 9 || e.keyCode === 27) {
-            e.preventDefault();
-            this.closeMenu();
-        }
-        // Up/down arrows
-        else if(e.keyCode === 38 || e.keyCode === 40){
-            e.preventDefault(); // Prevent the website from scrolling distractingly in the background
-
-            let targetId = this.state.selectedId;
-            let buttons = document.querySelectorAll('.menu')[0].getElementsByTagName('button');
-            let maxId = buttons.length - 1;
-
-            // Up arrow
-            if(e.keyCode === 38) {  
-                targetId--;
-                if(targetId < 0){
-                    targetId = maxId;
-                }
-            }
-            // Down arrow
-            else if(e.keyCode === 40) {
-                targetId++;
-                if(targetId > maxId){
-                    targetId = 0;
-                }
-            }
-            this.setSelected(targetId);
-            buttons[targetId].focus();
-        }
-    }
-
-    render(){
-        const isFlagged = this.activeTileIsFlagged();
-        const flaggedMode = isFlagged !== null && isFlagged ? "unflag" : "addflag";
-        return(
-            <div className="overlayWrapper menu" style={this.getPositioningStyle()}>
-                <section className="tileMenu" onKeyDown={this.handleKeyDown}>
-                    <button autoFocus className="tileMenuBtn unhideTile" onClick={this.unhideTile}></button>
-                    <button className={"tileMenuBtn " + flaggedMode} onClick={this.toggleFlag}></button>
-                </section>
-            </div>
-        )
-    }
-}
-

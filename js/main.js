@@ -2,9 +2,9 @@ const DARK = 'dark-theme';
 const LIGHT = 'light-theme';
 
 class InputMode {
-    static mouse = new Display('mouse');
-    static keyboard = new Display('keyboard');
-    static touch = new Display('touch');
+    static mouse = new InputMode('mouse');
+    static keyboard = new InputMode('keyboard');
+    static touch = new InputMode('touch');
   
     constructor(name) {
       this.name = name;
@@ -21,7 +21,6 @@ class MinesweeperGame extends React.Component{
         this.setGameOver = this.setGameOver.bind(this);
         this.updateFlagCounter = this.updateFlagCounter.bind(this);
         this.reset = this.reset.bind(this);
-        this.toggleMenuMode = this.toggleMenuMode.bind(this);
         this.setTheme = this.setTheme.bind(this);
         this.setInputMode = this.setInputMode.bind(this);
 
@@ -52,23 +51,24 @@ class MinesweeperGame extends React.Component{
     }
 
     updateProgress(){
-        if(this.state.safeTilesRemaining === 1){
-            this.gameWon();
+        if(this.state.safeTilesRemaining <= 0){
             return;
         }
+
+        if(this.state.safeTilesRemaining === 1){
+            this.setGameWon();
+            return;
+        }
+
         this.updateSafeTiles(-1);
     }
 
-    gameWon(){
+    setGameWon(){
         this.setState((state) => { return { ...state, gameOver: true,  safeTilesRemaining: 0}})
     }
 
     setGameOver(){
         this.setState((state) => { return { ...state, gameOver: true }})
-    }
-
-    setTheme(newTheme){
-        this.setState((state) => { return { ...state, theme: newTheme }});
     }
 
     updateSafeTiles(change){
@@ -79,53 +79,51 @@ class MinesweeperGame extends React.Component{
         this.setState((state) => { return { ...state, flagCounter: state.flagCounter + change } })
     }
 
-    toggleMenuMode(){
-        this.setState((state) => {return { ...state, isMenuMode: !state.isMenuMode}});
+    setTheme(newTheme){
+        this.setState((state) => { return { ...state, theme: newTheme }});
     }
 
     setInputMode(selectedInputMode){
         this.setState((state) => {return { ...state, inputMode: selectedInputMode}});
     }
-    
+
     render(){
         const isMenuMode = this.state.inputMode === InputMode.touch || this.state.inputMode === InputMode.keyboard;
 
         return (
             <div className={"app-body " + this.state.theme}>
-            <div className={"minesweeper"}>
-                <h1>MINESWEEPER</h1>
-                <Controls   isMenuMode = {isMenuMode}
-                            reset = {this.reset}
-                            setTheme = {this.setTheme}
-                            theme = {this.state.theme}
-                            toggleMenuMode = {this.toggleMenuMode}
-                            setInputMode = {this.setInputMode}
-                            inputMode = {this.state.inputMode}
-                />
-                <BoardSection   flagCount = {this.state.flagCounter}
-                                gameId = {this.state.gameId}
-                                isKeyboardMode = {this.state.inputMode === InputMode.keyboard}
-                                isMenuMode = {isMenuMode}
+                <div className="minesweeper">
+                    <h1>MINESWEEPER</h1>
+                    <Controls   isMenuMode = {isMenuMode}
+                                reset = {this.reset}
+                                setTheme = {this.setTheme}
+                                theme = {this.state.theme}
+                                setInputMode = {this.setInputMode}
+                                inputMode = {this.state.inputMode}
+                    />
+                    <BoardSection   flagCount = {this.state.flagCounter}
+                                    gameId = {this.state.gameId}
+                                    isMenuMode = {isMenuMode}
+                                    isGameOver = {this.state.gameOver}
+                                    numCols = {this.props.numCols}
+                                    numMines = {this.props.numMines}
+                                    numRows = {this.props.numRows}
+                                    safeTilesRemaining = {this.state.safeTilesRemaining}
+                                    setGameOver = {this.setGameOver}
+                                    totalMines = {this.props.numMines} 
+                                    updateFlagCounter = {this.updateFlagCounter}
+                                    updateProgress = {this.updateProgress}                      
+                    />
+                    <Result     gameId = {this.state.gameId}   
                                 isGameOver = {this.state.gameOver}
-                                numCols = {this.props.numCols}
-                                numMines = {this.props.numMines}
-                                numRows = {this.props.numRows}
-                                safeTilesRemaining = {this.state.safeTilesRemaining}
-                                setGameOver = {this.setGameOver}
-                                // toggleMenuMode = {this.toggleMenuMode}
-                                totalMines = {this.props.numMines} 
-                                updateFlagCounter = {this.updateFlagCounter}
-                                updateProgress = {this.updateProgress}                      
-                />
-                <Result     gameId = {this.state.gameId}   
-                            isGameOver = {this.state.gameOver}
-                            safeTilesRemaining = {this.state.safeTilesRemaining}        
-                />
-            </div>
+                                safeTilesRemaining = {this.state.safeTilesRemaining}        
+                    />
+                </div>
             </div>
         );
     }
 }
+
 
 class Result extends React.Component{
     constructor(props){
@@ -162,17 +160,53 @@ class Result extends React.Component{
         this.removeOverlay();
     }
 
-    closeOverlayButton(){
+    render(){
+        if(!this.props.isGameOver) return null;
+        const won = this.props.safeTilesRemaining === 0;
+        const cssClass = "result";
+
+        if(this.state.wantOverlay){
+            return (
+                <PanelOverlayWrapper    handleOverlayClose = {this.handleOverlayClose}
+                                        cssClass = {cssClass} >
+                    <ResultContents won = {won} />
+                </PanelOverlayWrapper>
+            )
+        }
         return (
-            <button autoFocus className="close" onClick={this.handleOverlayClose}>{String.fromCharCode(8211)}</button>
+            <section className={"panel " + cssClass}>
+                <ResultContents won = {won} />
+            </section>
         )
+    }
+}
+
+
+class ResultContents extends React.Component{
+    render(){
+        const status = this.props.won ? "Success" : "Failure";
+        const message = this.props.won ? 
+                "Lives saved: incalculable. Congratulations++" : 
+                "Explosions chaining. All hope lost. Goodb-";
+
+        return(
+            <>
+                <h2>MISSION RESULT</h2>
+                <h3>{status.toUpperCase()}</h3>
+                <p>{message.toLowerCase()}</p>
+            </>
+        );
+    }
+}
+
+
+class PanelOverlayWrapper extends React.Component{
+    constructor(props){
+        super(props);
+        this.getOverlayPositionStyle = this.getOverlayPositionStyle.bind(this);
     }
 
     getOverlayPositionStyle(){
-        if(!this.state.wantOverlay){
-            return null;
-        }
-
         // Position the overlay across the board. Vertically centered would be 
         // nice, but then we'd need to take the height of the message into
         // account when it won't've been rendered yet and BLEH.
@@ -189,41 +223,20 @@ class Result extends React.Component{
     }
 
     render(){
-        if(!this.props.isGameOver) return null;
-        const won = this.props.safeTilesRemaining === 0;
-
-        if(this.state.wantOverlay){
-            return (
-                <div className="overlayWrapper message" style={this.getOverlayPositionStyle()}>
-                    <ResultPanelUI  closeOverlayButton = {this.closeOverlayButton()}
-                                    won = {won}
-                    />
-                </div>
-            )
-        }
-        return <ResultPanelUI   closeOverlayButton = {null}
-                                won = {won}
-                />
-    }
-}
-
-class ResultPanelUI extends React.Component{
-    render(){
-        const status = this.props.won ? "Success" : "Failure";
-        const message = this.props.won ? 
-                "Lives saved: incalculable. Congratulations++" : 
-                "Explosions chaining. All hope lost. Goodb-";
-
         return(
-            <section className="panel result">
-                <h2>MISSION RESULT</h2>
-                {this.props.closeOverlayButton}
-                <h3>{status.toUpperCase()}</h3>
-                <p>{message.toLowerCase()}</p>
-            </section>
+            <div className="overlayWrapper message" style={this.getOverlayPositionStyle()}>
+                <section className={this.props.cssClass === null ? "panel" : "panel " + this.props.cssClass}>
+                    <button autoFocus className="close" onClick={this.props.handleOverlayClose}>{String.fromCharCode(8211)}</button>
+                    { this.props.children }
+                </section>
+            </div>
         );
     }
 }
+
+
+
+
 
 const root = ReactDOM.createRoot(
     document.getElementById('root')
