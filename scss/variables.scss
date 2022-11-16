@@ -1,30 +1,93 @@
 
+// rgba box-shadows with a non-variable colour:
+//      .panel:                     rgba(0, 88, 189, 0.05);
+//      .board:                     rgba(0,0,0, 0.2);
+//      .tileMenu.btn:              rgba(0,0,0, 0.2);
+//      .overlayWrapper .panel:     rgba(0,0,0, 0.3);
+// ---
+// all the tile numbers have their own non-var colours (cba listing them)
+// ---
+// rgbas using variables, which may not be the right variables on light
+// box-shadows
+//      .overlayWrapper:            rgba(v.$c_text,0.5);
+
+// background
+//      .tileMenu .btn:             rgba(v.$c_overlay_bg, 0.9);
+//      .overlayWrapper .menu       rgba(v.$c_overlay_bg, 0.8);
+
+// border-color
+//      .overlayWrapper .message    rgba(v.$c_text,0.7);
 
 
+$c_text_emphasis: rgb(247, 247, 247); // text (h2/3, values, activeToggle, hover), border (active/exploded tile, menu)
+$c_panel_border: rgb(0, 255, 76); // border for: panel, tiles, buttons (and text)
+$c_text: rgb(9, 255, 0); // main text colour, border for buttons(hover) and overlay, hover bg, h1 gradient
+$c_text_subtle: rgb(33, 202, 33); // separator, un-selected toggle option, bg on menu hover buttons
+$c_tile_bg_hidden: rgb(0, 109, 22); // single-use (tile)
+$c_panel_bg_inner: rgb(0, 80, 16); // single-use (panel bg gradient midpoint)
+$c_panel_bg: rgb(0, 54, 12); // solely used for panel bg purposes
+$c_overlay_bg: rgb(0, 40, 2); // like the body bg, but a bit lighter so it looks "above"
+$c_bg_main_inner: rgb(0, 37, 2); // bg main, but slightly lighter (mid-gradient, emphasis)
+$c_bg_main: rgb(0, 26, 2);  // body bg, board bg, tile.mine bg, text (h1 and button hover)
+
+$c_text: rgb(28, 241, 91);
+
+// $c_bg_main: rgb(0, 26, 2);
+// // 4x (3x in body bgs (fallback and grad); board bg
+// // 3x (mine bg, button hover text, h1 color)
+
+// $c_bg_main_inner: rgb(0, 37, 2);
+// // 1x (body bg grad)
+// // 1x ($c_tile_bg_mine_emphasis)
+
+// $c_text: rgb(9, 255, 0); // rgb(9, 255, 0); //#09FF00;
+// // 6x.
+// //      as text colour
+// //          body color, .close
+// //      border
+// //          button.btn, button.toggle:hover/focus .toggleInactive, .overlayWrapper, 
+// // 2x (button hover bg, h1 gradient)
+
+// $c_text_emphasis:  rgb(247, 247, 247);//rgb(251, 255, 250);
+// // 8x
+// //      as text colour
+// //          .panel h2, .progress .value, button.toggle, .result h3, .close:hover
+// //      other
+// //          .progress .value.error (border), tile border, .overlayWrapper.menu (border)
+// // 1x (border mine exploded
+
+// $c_text_subtle: rgb(33, 202, 33);
+// // 2x
+// //  .controls (border), button.toggle (color)
+
+// $c_panel_bg: rgb(0, 54, 12);
+// // 3x .panel (fallback and grad)
+// // 2x .panel h2 (grad)
+
+// $c_panel_bg_inner: rgb(0, 80, 16);
+// // 1x .panel
+
+// $c_panel_border: rgb(0, 255, 76);
+// // 6x
+// // .panel, 
+// // button.btn (color), button.btn (border)
+// // button.toggle, button.toggle(border)
+// // .tile
 
 
-$c_bg_main: rgb(0, 26, 2);
-$c_bg_main_inner: rgb(0, 37, 2);
+// $c_overlay_bg: rgb(0, 40, 2);
+// // 3x
+// // .tileMenu .btn (bg), .overlayWrapper.message, .overlayWrapper.menu
 
-$c_text: #09FF00;
-$c_text_emphasis: rgb(251, 255, 250);
-$c_text_subtle: rgb(33, 202, 33);
-
-$c_lightest: rgb(251, 255, 250);
-
-$c_panel_bg: rgb(0, 54, 12);
-$c_panel_bg_inner: rgb(0, 80, 16);
-$c_panel_border: rgb(0, 255, 76);
-
-$c_overlay_bg: rgb(0, 40, 2);
-
+// 2x each. Used by button.btn and button.toggle:hover/focus .toggleInactive
 $c_button_hover_text: $c_bg_main;
 $c_button_hover_bg: $c_text;
 
-$c_tile_bg_hidden: rgb(0, 109, 22);//rgb(0, 94, 19);
-$c_tile_bg_mine: $c_bg_main;//rgb(8, 228, 0);
+
+//$c_tile_bg_hidden: rgb(0, 109, 22);
+$c_tile_bg_mine: $c_bg_main;
 $c_tile_bg_mine_emphasis: $c_bg_main_inner;
-$c_tile_border_mine_emphasis: $c_lightest;
+$c_tile_border_mine_emphasis: $c_text_emphasis;
 $c_tile_bg_number: rgb(59, 59, 59);
 
 // The h1 is doing "a thing", so give it its own special stuff
@@ -38,44 +101,3 @@ $g_h1_bg: linear-gradient(  90deg,
                             transparent 100%);
 $c_h1: $c_bg_main;
 $c_h1_border: rgb(8, 245, 0);
-
-
-// h1 with green, but with the green text kinda disappearing into the "explosion" beam
-// $g_h1_bg: linear-gradient(  90deg,
-//                             transparent 0%, 
-//                             rgba($c_text,0.2) 15%, 
-//                             rgba($c_text,0.45) 45%, 
-//                             rgba(rgb(232, 255, 230),1) 50%, 
-//                             rgba($c_text,0.45) 55%, 
-//                             rgba($c_text,0.2) 85%, 
-//                             transparent 100%);
-// $c_h1: rgb(0, 255, 0);
-// $c_h1_border: rgb(8, 245, 0);
-
-
-//$g_h1_bg: linear-gradient(90deg, transparent 0%, rgba(rgb(0, 204, 255),0.5) 40%, rgba(white,0.8) 50%, rgba(rgb(0, 204, 255),0.5) 60%, transparent 100%); // looks kinda cool, but eh...
-
-// This is the set for the light blue layout which you decided you didn't like
-// $c_bg_main: rgb(165, 234, 255);
-// $c_bg_main_inner: rgb(196, 241, 255);
-
-// $c_text: rgb(0, 88, 189);
-
-// $c_lightest: rgb(242, 252, 255);
-
-// $c_panel_bg: rgb(217, 246, 255);
-// $c_panel_bg_inner: rgb(227, 248, 255);
-// $c_panel_border: rgb(114, 206, 235);
-
-
-// $g_h1_bg: linear-gradient(90deg, transparent 0%, rgba($c_lightest,0.5) 7%, rgba($c_lightest,0.9) 50%, rgba($c_lightest,0.5) 93%, transparent 100%);
-// $c_h1: $c_text;
-// $c_h1_border: $c_lightest;
-
-//$c_button_hover_text: $c_text;
-//$c_button_hover_bg: rgba(v.$c_lightest,0.7);
-
-//$c_tile_bg_hidden: rgb(136, 142, 156);
-// $c_tile_bg_mine: rgb(141, 0, 0);
-// $c_tile_bg_mine_emphasis: rgb(138, 0, 0);
-// $c_tile_border_mine_emphasis: red;

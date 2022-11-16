@@ -29,7 +29,7 @@ function css(){
 
 function jsReact() {
     return gulp.src([
-                    `${PATH_WORKING_SCRIPTS}/status.js`,
+                    `${PATH_WORKING_SCRIPTS}/controls.js`,
                     `${PATH_WORKING_SCRIPTS}/board.js`,
                     `${PATH_WORKING_SCRIPTS}/main.js`
                 ])
@@ -37,6 +37,8 @@ function jsReact() {
         .pipe(babel({
             presets: ["@babel/preset-react"]
           }))
+        .pipe(gulp.src(`${PATH_WORKING_SCRIPTS}/lightDarkMode.js`))
+        .pipe(concat('minesweeper-react.js'))
         .pipe(uglify())
         .pipe(rename({ extname: '.min.js' }))
         .pipe(gulp.dest(PATH_BUILT_SCRIPTS));
