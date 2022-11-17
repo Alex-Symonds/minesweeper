@@ -62,6 +62,7 @@
 
     --h1-c-text: var(--c-bg-0);
     --h1-c-border: rgb(8, 245, 0);
+
     --h1-g-0: transparent;
     --h1-g-1: rgba(9, 255, 0, .45);
     --h1-g-2: rgba(9, 255, 0, .9);
@@ -88,7 +89,7 @@
     --c-tile-mine-exploded: var(--c-bg-0-alt);
     --c-tile-number: rgb(59, 59, 59);
     --c-tile-flag: transparent;
-    --c-tile-flag-wrong-icon: url(../images/shield-wrong.svg);
+    --url-tile-flag-wrong-icon: url(../images/shield-wrong.svg);
     
     --c-tile-num1: rgb(0, 236, 0);
     --c-tile-num2: rgb(0, 217, 255);
@@ -120,7 +121,21 @@
 
     --h1-c-text: rgb(0, 26, 2);
     --h1-c-border: rgb(0, 26, 2);
-    --h1-g-bg: transparent;
+
+    --h1-g-0: transparent;
+    --h1-g-1: rgb(247, 247, 247);
+    --h1-g-2: rgb(250, 250, 250);
+    --h1-g-3: rgb(255, 255, 255);
+    --h1-g-bg: linear-gradient(90deg,
+                var(--h1-g-0) 0%, 
+                var(--h1-g-1) 13%, 
+                var(--h1-g-2) 45%, 
+                var(--h1-g-3) 50%, 
+                var(--h1-g-2) 55%, 
+                var(--h1-g-1) 87%, 
+                var(--h1-g-0) 100%);
+
+
 
     --overlay-c-message-border: rgba(107, 107, 107, 0.7);
     --overlay-c-menu-bg: rgba(247, 247, 247, 0.8);
@@ -699,7 +714,8 @@ button.tileMenuBtn{
 
     &.wrong{
         &:before{
-            background: var(--url-tile-flag-wrong-icon) var(--c-tile-number);
+            background-image: var(--url-tile-flag-wrong-icon);
+            background-color: var(--c-tile-number);
             background-size: 80%;
             background-repeat: no-repeat;
             background-position: center;

@@ -37,8 +37,6 @@ function jsReact() {
         .pipe(babel({
             presets: ["@babel/preset-react"]
           }))
-        .pipe(gulp.src(`${PATH_WORKING_SCRIPTS}/lightDarkMode.js`))
-        .pipe(concat('minesweeper-react.js'))
         .pipe(uglify())
         .pipe(rename({ extname: '.min.js' }))
         .pipe(gulp.dest(PATH_BUILT_SCRIPTS));
